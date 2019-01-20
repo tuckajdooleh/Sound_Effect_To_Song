@@ -4,14 +4,14 @@ import librosa
 #import midi
 from mido import MidiFile
 import mido
-#import time
+import time
 import os.path
 from pathlib import Path
 import wave
 import numpy as np
 
 #load in C version of the sound 1600
-y, sr = librosa.load('src/sound_effect/sound_in_c4.wav', sr=16000) # y is a numpy array of the wav file, sr = sample rate
+y, sr = librosa.load('src/sound_effect/sound_in_c4.wav', sr=32000) # y is a numpy array of the wav file, sr = sample rate
 #place that version in Chromatic as C
 #then do the entire chromatic scale
 librosa.output.write_wav('src/chromatic/60.wav',y,sr,norm=False);
@@ -34,6 +34,7 @@ for i in range(34):
 		y_shifted = librosa.effects.pitch_shift(y, sr, n_steps=-1-i) # shifted by 1 half step
 		librosa.output.write_wav(name,y_shifted,sr,norm=False);
 		print (str(59-i));
+
 
 #mid = MidiFile('src/SkinnyLove.mid')
 
@@ -97,7 +98,7 @@ for i, track in enumerate(mid.tracks):
 		#			if len(combineNotes) > 0 :
 					song += previous_audio
 					#how
-					song += rest_time
+				#	song += rest_time
 				
 					filename = "src/chromatic/" + str(msg.note) + ".wav"
 					new_note = AudioSegment.from_wav(filename)
@@ -134,4 +135,63 @@ newpart2= part2[:t2]
 song = part1.overlay(newpart2)
 
 song.export('src/final/final.wav', format="wav")
+'''
+'''
+note_list = [101]
+
+for i in range(26,101):
+	print ('added :' + str(i) + ' to list')
+	filename = "src/chromatic/" + str(i) + ".wav"
+	note_list.insert(i, AudioSegment.from_wav(filename))
+	
+
+#mid = MidiFile('src/SkinnyLove.mid')
+
+#song = AudioSegment.from_wav('src/gabe-bark.wav')
+song = AudioSegment.silent(duration=(1000))
+
+
+
+previous_audio = song
+#if its 0 then take current not and merge the 2 notes, if its not zero, then add previous note to song
+
+#
+resttime = 0
+combineNotes = []
+mid = MidiFile('src/midi/song.mid')
+print (mid.type)
+numberoftracks = 0
+
+
+for msg in mid.tracks[0]:
+	#print(msg)
+
+	if not msg.is_meta:
+		print(msg)
+		if msg.type == 'note_on' :
+			if msg.velocity == 0:
+				resttime += msg.time	
+			elif msg.time == 0:
+				
+				#filename = "src/chromatic/" + str(msg.note) + ".wav"
+				#new_note = AudioSegment.from_wav(filename)
+				previous_audio = previous_audio.overlay(note_list[msg.note] )
+			else:
+			
+				#rest_time = mido.tick2second(msg.time , mid.ticks_per_beat, 500000) + mido.tick2second(resttime, mid.ticks_per_beat, 500000)
+				
+				play(previous_audio)
+				#song += previous_audio
+				#song += rest_time
+				
+				#time.sleep(rest_time)
+				
+				#filename = "src/chromatic/" + str(msg.note) + ".wav"
+				#new_note = AudioSegment.from_wav(filename)
+				new_note = note_list[msg.note]
+				previous_audio = new_note
+				resttime = 0
+				
+
+#play(song)
 '''
