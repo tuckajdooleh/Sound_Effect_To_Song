@@ -8,6 +8,7 @@ import os.path
 from pathlib import Path
 import wave
 import numpy as np
+import math
 
 #load in C version of the sound 1600
 y, sr = librosa.load('src/sound_effect/sound_in_c4.wav', sr=32000) # y is a numpy array of the wav file, sr = sample rate
@@ -53,7 +54,33 @@ for i, track in enumerate(mid.tracks):
 				
 					filename = "src/chromatic/" + str(msg.note) + ".wav"
 					new_note = AudioSegment.from_wav(filename)
-			
+					#decibels = msg.velocity - 10 -15
+					#40*(math.log((msg.velocity)/127))
+					#decibels = int(decibels)
+					#new_note = new_note + (decibels - 70)
+					
+					#if it should be 40 then it should - 30
+					# 70 -x = 40
+					#x = 30
+					#x = -(40 - 70)
+					
+					#the note SHOULD be this loud exactly
+					#BUT we dont know how loud the original sound is...
+					#so we guess :)
+					#normal conversation is 60 dbs
+					#lawn mower is 90
+					#rock concert is 120
+					#so we guess the sound is 70 to be safe
+					#if we shot too high then ooh wee its quiet and wont damage
+					# our ears oooh weee!
+					
+					
+					
+					
+					#new_note = new_note.normalize_spl_by_average(decibels)
+					#msg.velocity
+					#normalize_spl_by_average(db)
+					# 40 log (V/127)
 					song_canvas = song_canvas.overlay(new_note, position=current_time)
 				else:
 					
@@ -62,7 +89,12 @@ for i, track in enumerate(mid.tracks):
 					current_time += mido.tick2second(msg.time , mid.ticks_per_beat, 500000)*1000
 					filename = "src/chromatic/" + str(msg.note) + ".wav"
 					new_note = AudioSegment.from_wav(filename)
-
+					#decibels = msg.velocity - 10 - 15
+					#decibels = int(decibels)
+					#new_note = new_note + (decibels - 70)
+					#new_note = new_note.normalize_spl_by_average(decibels)
+					
+					
 					song_canvas = song_canvas.overlay(new_note, position=current_time)
 		
 	song_canvas.export('src/final/part' + str(i) +'.wav', format="wav")
